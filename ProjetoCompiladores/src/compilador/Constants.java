@@ -13,6 +13,7 @@ public class Constants
 	public static final Character C_FECHA_CHAVE 	= '}';
 	public static final Character C_EXCLAMACAO 		= '!';
 	public static final Character C_PULA_LINHA 		= '\n';
+	public static final Character C_PULA_LINHA_MAC	= '\r';
 	public static final Character C_BARRA 			= '/';
 	public static final Character C_MAIS 			= '+';
 	public static final Character C_MENOS 			= '-';

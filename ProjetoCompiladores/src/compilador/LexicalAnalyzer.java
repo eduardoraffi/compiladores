@@ -41,7 +41,7 @@ public class LexicalAnalyzer
     				{
     					throw new Exception("Missing '}' in file");
     				}
-    				if(caracterLido == Constants.C_PULA_LINHA)
+    				if(caracterLido == Constants.C_PULA_LINHA || caracterLido == Constants.C_PULA_LINHA_MAC)
     				{
     					line++;
     				}
