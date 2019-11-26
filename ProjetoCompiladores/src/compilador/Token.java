@@ -1,43 +1,43 @@
 package compilador;
 
-public class Token {
-
+public class Token 
+{
     private final String mSymbol;
-    private final String lexema;
-    private final int linha;
+    private final String mLexem;
+    private final int mLine;
     
-    public Token(String simbolo, String lexema, int linha) throws Exception
+    public Token(String symbol, String lexem, int line) throws Exception
     {
-    	if(simbolo == null) throw new Exception("Symbol is null");
-        if(lexema == null) throw new Exception("Lexem is null");
-        this.mSymbol = simbolo;
-        this.lexema = lexema;
-        this.linha = linha;
+    	if(symbol == null) throw new Exception("Symbol is null");
+        if(lexem == null) throw new Exception("Lexem is null");
+        mSymbol = symbol;
+        mLexem = lexem;
+        mLine = line;
     }
        
-    public String getSimbolo()
+    public String getSymbol()
     {
         return mSymbol;
     }
      
-    public String getLexema()
+    public String getLexem()
     {
-        return lexema;
+        return mLexem;
     }
     
-    public int getLinha()
+    public int getLine()
     {
-        return linha;
+        return mLine;
     }
     
     public String toString()
     {
-        return "S�mbolo\t: "+mSymbol+"\nLexema\t: "+lexema+"\nC�digo\t: "+simboloToCode()+"\nLinha\t: "+linha;
+        return "Simbol\t: "+mSymbol+"\nLexem\t: "+mLexem+"\nCode\t: " + getSymbolId() + "\nLine\t: "+mLine;
     }
     
-    public static int simboloToCode(String simbolo)
+    public static int getSymbolId(String symbol)
     {
-        switch (simbolo)
+        switch (symbol)
         {
 	        case Constants.S_INVERTER:
 	             return 0;   
@@ -124,12 +124,12 @@ public class Token {
         }
     }
     
-     public int simboloToCode()
+     public int getSymbolId()
      {
     	 switch (this.mSymbol)
          {
  	        case Constants.S_INVERTER:
- 	             return 0;   
+ 	        	return 1;   
  	        case Constants.S_PROGRAMA:
  	            return 1;
  	        case Constants.S_INICIO:
