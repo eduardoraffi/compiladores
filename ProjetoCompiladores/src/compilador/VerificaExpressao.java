@@ -5,69 +5,9 @@ import java.util.Vector;
 import compilador.Errors.ErrorType;
 
 public class VerificaExpressao {
-
-	private interface vetorExp<Generic> {
-		public Generic getExp();
-
-		public void setExp(Generic t);
-	}
-
-	private class ExpSimb implements vetorExp<Symbol> {
-
-		private Symbol simbolo;
-
-		public ExpSimb(Symbol s) {
-			setExp(s);
-		}
-
-		@Override
-		public Symbol getExp() {
-			return simbolo;
-		}
-
-		@Override
-		public void setExp(Symbol t) {
-			simbolo = t;
-		}
-	}
-
-	private class ExpOp implements vetorExp<Token> {
-
-		private Token token;
-
-		public ExpOp(Token t) {
-			setExp(t);
-		}
-
-		public Token getExp() {
-			return token;
-		}
-
-		public void setExp(Token t) {
-			token = t;
-		}
-	}
-
-	private class ExpNum implements vetorExp<Token> {
-
-		private Token token;
-
-		public ExpNum(Token t) {
-			setExp(t);
-		}
-
-		public Token getExp() {
-			return token;
-		}
-
-		public void setExp(Token t) {
-			token = t;
-		}
-	}
-
-	// Pós fixa
-	private Vector<vetorExp> mPosFixa;
-	// Pilha de operadores
+	
+	@SuppressWarnings("rawtypes")
+	private Vector<PosFixa> mPosFixa;
 	private Vector<Token> mStack;
 
 	private boolean isBooleanExpression = false;
@@ -172,7 +112,7 @@ public class VerificaExpressao {
 					break;
 				default:
 					Errors.generalError(ErrorType.GENERATE_EXPRESSION);
-					;
+					break;
 				}
 			} else {
 				if (mPosFixa.get(pos).getClass() == ExpNum.class) {
@@ -365,7 +305,7 @@ public class VerificaExpressao {
 		if (mPosFixa != null)
 			throw new Exception("começando uma expressao sem terminar uma");
 
-		mPosFixa = new Vector<vetorExp>();
+		mPosFixa = new Vector<PosFixa>();
 		mStack = new Vector<Token>();
 	}
 
@@ -426,5 +366,65 @@ public class VerificaExpressao {
 
 	public boolean getIfExpressionIsBoolean() {
 		return isBooleanExpression;
+	}
+	
+	//Classes to aux posFixa formation
+	private interface PosFixa<Generic> {
+		public Generic getExp();
+
+		public void setExp(Generic genericType);
+	}
+
+	private class ExpSimb implements PosFixa<Symbol> {
+
+		private Symbol mSymbol;
+
+		public ExpSimb(Symbol symbol) {
+			setExp(symbol);
+		}
+
+		@Override
+		public Symbol getExp() {
+			return mSymbol;
+		}
+
+		@Override
+		public void setExp(Symbol symbol) {
+			mSymbol = symbol;
+		}
+	}
+
+	private class ExpOp implements PosFixa<Token> {
+
+		private Token mToken;
+
+		public ExpOp(Token token) {
+			setExp(token);
+		}
+
+		public Token getExp() {
+			return mToken;
+		}
+
+		public void setExp(Token token) {
+			mToken = token;
+		}
+	}
+
+	private class ExpNum implements PosFixa<Token> {
+
+		private Token mToken;
+
+		public ExpNum(Token token) {
+			setExp(token);
+		}
+
+		public Token getExp() {
+			return mToken;
+		}
+
+		public void setExp(Token token) {
+			mToken = token;
+		}
 	}
 }
