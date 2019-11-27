@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -27,13 +28,12 @@ public class Interface extends javax.swing.JFrame {
 	private int numBreaks = 0;
 	private boolean runWithBreakPoint = false;
 
-	// Construtor da classe
 	public Interface() {
 		this.mFileUrl = null;
 		initComponents();
 		mDefaultTableModelStack = (DefaultTableModel) tabelaPilha.getModel();
 		mDefaultTableModelInstruction = (DefaultTableModel) tabelaInstrucao.getModel();
-		textoBreak.setText("Digite as linhas de Break Point separadas por espaço.");
+		textoBreak.setText("Type break point lines separating with blank spaces");
 		textoBreak.setLineWrap(true);
 		textoSaida.setLineWrap(true);
 	}
@@ -93,7 +93,7 @@ public class Interface extends javax.swing.JFrame {
 		tabelaPilha.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 		tabelaPilha.setModel(new javax.swing.table.DefaultTableModel(new Object[][] {
 
-		}, new String[] { "Endereço", "Valor" }) {
+		}, new String[] { "Address", "Value" }) {
 		
 			private static final long serialVersionUID = 1L;
 			Class[] types = new Class[] { java.lang.Integer.class, java.lang.Integer.class };
@@ -114,11 +114,11 @@ public class Interface extends javax.swing.JFrame {
 			tabelaPilha.getColumnModel().getColumn(1).setResizable(false);
 		}
 
-		jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-		jLabel1.setText("Pilha");
+		jLabel1.setFont(new java.awt.Font("Arial", 0, 18)); 
+		jLabel1.setText("Stack");
 
-		jLabel2.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-		jLabel2.setText("Instruções");
+		jLabel2.setFont(new java.awt.Font("Arial", 0, 18)); 
+		jLabel2.setText("Instructions");
 
 		textoSaida.setEditable(false);
 		textoSaida.setColumns(20);
@@ -126,17 +126,17 @@ public class Interface extends javax.swing.JFrame {
 		textoSaida.setWrapStyleWord(true);
 		jScrollPane3.setViewportView(textoSaida);
 
-		jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+		jLabel5.setFont(new java.awt.Font("Arial", 0, 18)); 
 		jLabel5.setText("Break Point's");
 
-		botaoBreak.setText("Executar c/ Break");
+		botaoBreak.setText("Execute with bkp");
 		botaoBreak.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				botaoBreakActionPerformed(evt);
 			}
 		});
 
-		botaoContinuar.setText("Executar");
+		botaoContinuar.setText("Execute");
 		botaoContinuar.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				botaoContinuarActionPerformed(evt);
@@ -153,7 +153,7 @@ public class Interface extends javax.swing.JFrame {
 		});
 		jScrollPane4.setViewportView(textoBreak);
 
-		jLabel6.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+		jLabel6.setFont(new java.awt.Font("Arial", 0, 18)); 
 		jLabel6.setText("Saida");
 
 		jMenu1.setText("Arquivo");
@@ -163,7 +163,7 @@ public class Interface extends javax.swing.JFrame {
 			}
 		});
 
-		BotaoAbrirArqv.setText("Abrir arquivo");
+		BotaoAbrirArqv.setText("Open file");
 		BotaoAbrirArqv.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				BotaoAbrirArqvActionPerformed(evt);
@@ -171,7 +171,7 @@ public class Interface extends javax.swing.JFrame {
 		});
 		jMenu1.add(BotaoAbrirArqv);
 
-		BotaoExecutarArqv.setText("Executar arquivo");
+		BotaoExecutarArqv.setText("Run file");
 		BotaoExecutarArqv.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				BotaoExecutarArqvActionPerformed(evt);
@@ -521,11 +521,11 @@ public class Interface extends javax.swing.JFrame {
 class FiltroDeArquivo extends javax.swing.filechooser.FileFilter {
 	@Override
 	public boolean accept(File file) {
-		return file.isDirectory() || file.getAbsolutePath().endsWith(".obj");
+		return file.isDirectory() || file.getAbsolutePath().endsWith(".txt");
 	}
 
 	@Override
 	public String getDescription() {
-		return "MV File(*.obj)";
+		return "*.txt";
 	}
 }

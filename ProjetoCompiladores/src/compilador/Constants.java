@@ -9,7 +9,7 @@ public class Constants
 	}
 	
 	//paths
-	public static final String PATH_CODE_GEN		= "/Users/eduardoraffi/Documents/Faculdade/Compiladores/CodigoGerado/code.txt";
+	public static final String PATH_CODE_GEN		= "D:\\Documents\\Faculdade\\Faculdade2019\\Compiladores\\Geracao_Codigo\\code.txt";
 	
 	//Chars
 	public static final Character C_ABRE_CHAVE 		= '{';

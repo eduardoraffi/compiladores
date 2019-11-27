@@ -419,8 +419,6 @@ public class SyntaxAnalyzer {
 
 	private void analisaFator() throws Exception {
 		if (mToken.getSymbolId() == Constants.IDENTIFICADOR) {
-			getNextToken();
-
 			if (mSemanticAnalyzer.pesquisaDeclVarFunc(mToken)) {
 				if (mSemanticAnalyzer.getSymbolType(mToken).getClass() == Rotina.class)
 					analisaChamadaFuncao();
