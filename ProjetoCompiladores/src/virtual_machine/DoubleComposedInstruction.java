@@ -8,13 +8,13 @@ public class DoubleComposedInstruction extends Instruction {
 			int parameter2) throws Exception {
 		super(instructionTypeAndName, line);
 		if (InstructionTypeAndName.getInstructionType(instructionTypeAndName) != 2) {
-			throw new Exception("instrucao de outro tipo");
+			throw new Exception("Different instruction types!");
 		}
 		if (parameter1 < 0) {
-			throw new Exception("p1 nao pode ser menor que zero");
+			throw new Exception("parameter1 cannot be lower than zero");
 		}
 		if (parameter2 < 0) {
-			throw new Exception("p2 nao pode ser menor que zero");
+			throw new Exception("parameter2 cannot be lower than zero");
 		}
 
 		mParameter1 = parameter1;

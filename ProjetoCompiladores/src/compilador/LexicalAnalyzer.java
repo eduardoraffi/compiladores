@@ -26,7 +26,7 @@ public class LexicalAnalyzer {
 	}
 
 	private void readAllFile() throws Exception {
-		readCharacter(); // read 1st char
+		readCharacter();
 		while (leituraDoArquivo != -1) {
 			if (caracterLido == Constants.C_ABRE_CHAVE) {
 				while (caracterLido != Constants.C_FECHA_CHAVE) {
@@ -48,8 +48,6 @@ public class LexicalAnalyzer {
 				readCharacter();
 				continue;
 			}
-			// Trata conteudo dentro de comentario do tipo /**/ para que n�o entre na tabela
-			// de tokens
 			if (caracterLido == Constants.C_BARRA) {
 				readCharacter();
 				if (caracterLido == Constants.C_ESTRELA) {

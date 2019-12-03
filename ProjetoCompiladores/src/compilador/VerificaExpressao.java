@@ -5,7 +5,7 @@ import java.util.Vector;
 import compilador.Errors.ErrorType;
 
 public class VerificaExpressao {
-	
+
 	@SuppressWarnings("rawtypes")
 	private Vector<PosFixa> mPosFixa;
 	private Vector<Token> mStack;
@@ -14,52 +14,7 @@ public class VerificaExpressao {
 
 	public VerificaExpressao() {
 		mPosFixa = null;
-	}
-
-	private boolean isToAddOperador(Token token) throws Exception {
-		if (mStack == null)
-			return false;
-		if (mStack.size() == 0) {
-			return true;
-		} else {
-			int pilhaPos = (mStack.size() - 1);
-			return precedencia(token.getSymbolId(), mStack.get(pilhaPos).getSymbolId());
-		}
-	}
-
-	private boolean precedencia(int fator, int pilha) throws Exception {
-		if (codigoDePrecedencia(fator) > codigoDePrecedencia(pilha))
-			return true;
-
-		return false;
-	}
-
-	private int codigoDePrecedencia(int i) throws Exception {
-		if (i == Constants.NAO || i == Constants.INVERTER)
-			return 7;
-
-		if (i == Constants.MULT || i == Constants.DIV)
-			return 6;
-
-		if (i == Constants.MAIS || i == Constants.MENOS)
-			return 5;
-
-		if (i == Constants.MAIOR || i == Constants.MAIORIG || i == Constants.MENOR || i == Constants.MENORIG)
-			return 4;
-
-		if (i == Constants.IG || i == Constants.DIF)
-			return 3;
-
-		if (i == Constants.E)
-			return 2;
-
-		if (i == Constants.OU)
-			return 1;
-
-		if (i == Constants.ABRE_PARENTESES || i == Constants.FECHA_PARENTESES)
-			return 0;
-
-		throw new Exception("codigo inválido");
+		mStack = null;
 	}
 
 	private void geraExp() throws Exception {
@@ -114,27 +69,25 @@ public class VerificaExpressao {
 					Errors.generalError(ErrorType.GENERATE_EXPRESSION);
 					break;
 				}
-			} else {
-				if (mPosFixa.get(pos).getClass() == ExpNum.class) {
-					ExpNum num = (ExpNum) mPosFixa.get(pos);
-					if (num.getExp().getSymbolId() == Constants.NUMERO) {
-						CodeGenerator.getInstance().generateCommand(Constants.CG_LDC, num.getExp().getLexem());
-					} else {
-						if (num.getExp().getSymbolId() == Constants.VERDADEIRO) {
-							CodeGenerator.getInstance().generateCommand(Constants.CG_LDC, 1);
-						} else {
-							CodeGenerator.getInstance().generateCommand(Constants.CG_LDC, 0);
-						}
-					}
+			} else if (mPosFixa.get(pos).getClass() == ExpNum.class) {
+				ExpNum num = (ExpNum) mPosFixa.get(pos);
+				if (num.getExp().getSymbolId() == Constants.NUMERO) {
+					CodeGenerator.getInstance().generateCommand(Constants.CG_LDC, num.getExp().getLexem());
 				} else {
-					ExpSimb sim = (ExpSimb) mPosFixa.get(pos);
-					if (sim.getExp().getType().getClass() == Rotina.class) {
-						CodeGenerator.getInstance().generateCommand(Constants.CG_CALL,
-								Constants.CG_LABEL + "" + sim.getExp().getType().getInfo());
-						CodeGenerator.getInstance().generateCommand(Constants.CG_LDV, 0);
+					if (num.getExp().getSymbolId() == Constants.VERDADEIRO) {
+						CodeGenerator.getInstance().generateCommand(Constants.CG_LDC, 1);
 					} else {
-						CodeGenerator.getInstance().generateCommand(Constants.CG_LDV, sim.getExp().getType().getInfo());
+						CodeGenerator.getInstance().generateCommand(Constants.CG_LDC, 0);
 					}
+				}
+			} else {
+				ExpSimb sim = (ExpSimb) mPosFixa.get(pos);
+				if (sim.getExp().getType().getClass() == Rotina.class) {
+					CodeGenerator.getInstance().generateCommand(Constants.CG_CALL,
+							Constants.CG_LABEL + "" + sim.getExp().getType().getInfo());
+					CodeGenerator.getInstance().generateCommand(Constants.CG_LDV, 0);
+				} else {
+					CodeGenerator.getInstance().generateCommand(Constants.CG_LDV, sim.getExp().getType().getInfo());
 				}
 			}
 			pos++;
@@ -301,9 +254,10 @@ public class VerificaExpressao {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	public void comecaExpressao() throws Exception {
 		if (mPosFixa != null)
-			throw new Exception("começando uma expressao sem terminar uma");
+			throw new Exception("Starting an expression without finishing another one.");
 
 		mPosFixa = new Vector<PosFixa>();
 		mStack = new Vector<Token>();
@@ -311,21 +265,21 @@ public class VerificaExpressao {
 
 	public void adicionaFatorNaExpressao(Symbol symbol) throws Exception {
 		if (mPosFixa == null)
-			throw new Exception("adicionando na expressao sem começar uma");
+			throw new Exception("adding in expression without starting another one");
 
 		mPosFixa.add(new ExpSimb(symbol));
 	}
 
 	public void adicionaFatorNaExpressao(Token token) throws Exception {
 		if (mPosFixa == null)
-			throw new Exception("adicionando na expressao sem começar uma");
+			throw new Exception("adding in expression without starting another one");
 
 		mPosFixa.add(new ExpNum(token));
 	}
 
 	public void adicionaOperadorNaExpressao(Token token) throws Exception {
 		if (mPosFixa == null)
-			throw new Exception("adicionando na expressao sem começar uma");
+			throw new Exception("adding in expression without starting another one");
 
 		if (token.getSymbolId() == Constants.ABRE_PARENTESES) {
 			mStack.add(token);
@@ -338,7 +292,7 @@ public class VerificaExpressao {
 					mPosFixa.add(new ExpOp(aux));
 					posPilha--;
 					if (posPilha < 0)
-						throw new Exception("Fecha parentesis nao encontrado. Expresao invalida");
+						Errors.generalError(token.getLine(), ErrorType.MISSING_CLOSING_PARENTHESES);
 				}
 				mStack.remove(posPilha);
 			} else {
@@ -351,9 +305,50 @@ public class VerificaExpressao {
 		}
 	}
 
+	private boolean isToAddOperador(Token token) throws Exception {
+		if (mStack == null)
+			return false;
+		if (mStack.size() == 0) {
+			return true;
+		} else {
+			int stackPosition = (mStack.size() - 1);
+
+			return (priorityOrder(token.getSymbolId()) > priorityOrder(mStack.get(stackPosition).getSymbolId()) ? true
+					: false);
+		}
+	}
+
+	private int priorityOrder(int i) throws Exception {
+		if (i == Constants.NAO || i == Constants.INVERTER)
+			return 7;
+
+		if (i == Constants.MULT || i == Constants.DIV)
+			return 6;
+
+		if (i == Constants.MAIS || i == Constants.MENOS)
+			return 5;
+
+		if (i == Constants.MAIOR || i == Constants.MAIORIG || i == Constants.MENOR || i == Constants.MENORIG)
+			return 4;
+
+		if (i == Constants.IG || i == Constants.DIF)
+			return 3;
+
+		if (i == Constants.E)
+			return 2;
+
+		if (i == Constants.OU)
+			return 1;
+
+		if (i == Constants.ABRE_PARENTESES || i == Constants.FECHA_PARENTESES)
+			return 0;
+
+		throw new Exception("priorityOrder(): " + i + "Invalid symbol");
+	}
+
 	public void terminaExpressao() throws Exception {
 		if (mPosFixa == null)
-			throw new Exception("terminando uma expressao sem começar uma");
+			throw new Exception("adding in expression without starting another one");
 
 		int i = mStack.size() - 1;
 		while (i >= 0) {
@@ -367,8 +362,8 @@ public class VerificaExpressao {
 	public boolean getIfExpressionIsBoolean() {
 		return isBooleanExpression;
 	}
-	
-	//Classes to aux posFixa formation
+
+	// Classes to aux posFixa formation
 	private interface PosFixa<Generic> {
 		public Generic getExp();
 

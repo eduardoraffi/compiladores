@@ -8,8 +8,8 @@ public class InstructionProcessor {
 	private Vector<Instruction> mInstructionVector = null;
 	private VMStack mStack = null;
 	private boolean isEndOfStack = false;
-	private int newValue = 0;
-	private String output = "";
+	private int mNewValue = 0;
+	private String mOutput = "";
 	int mInstruction = 0;
 
 	public InstructionProcessor(String arquivo) throws Exception {
@@ -26,11 +26,11 @@ public class InstructionProcessor {
 	}
 
 	public String getOutput() {
-		return output;
+		return mOutput;
 	}
 
 	public void setOutput() {
-		output = null;
+		mOutput = null;
 	}
 
 	public boolean isStackReachEnd() {
@@ -135,36 +135,36 @@ public class InstructionProcessor {
 
 	private void add() {
 		// M[s-1] := M[s-1] + M[s]; s := s-1
-		newValue = mStack.getValue(2) + mStack.getValue(1);
-		mStack.setValue(2, newValue);
+		mNewValue = mStack.getValue(2) + mStack.getValue(1);
+		mStack.setValue(2, mNewValue);
 		mStack.pop();
 	}
 
 	private void sub() {
 		// M[s-1]:=M[s-1] - M[s]; s:=s - 1
-		newValue = mStack.getValue(2) - mStack.getValue(1);
-		mStack.setValue(2, newValue);
+		mNewValue = mStack.getValue(2) - mStack.getValue(1);
+		mStack.setValue(2, mNewValue);
 		mStack.pop();
 	}
 
 	private void mult() {
 		// M[s-1]:=M[s-1] * M[s]; s:=s - 1
-		newValue = mStack.getValue(2) * mStack.getValue(1);
-		mStack.setValue(2, newValue);
+		mNewValue = mStack.getValue(2) * mStack.getValue(1);
+		mStack.setValue(2, mNewValue);
 		mStack.pop();
 	}
 
 	private void divi() {
 		// M[s-1]:=M[s-1] div M[s]; s:=s - 1
-		newValue = mStack.getValue(2) / mStack.getValue(1);
-		mStack.setValue(2, newValue);
+		mNewValue = mStack.getValue(2) / mStack.getValue(1);
+		mStack.setValue(2, mNewValue);
 		mStack.pop();
 	}
 
 	private void inv() {
 		// M[s]:= -M[s]
-		newValue = -mStack.getValue(1);
-		mStack.setValue(1, newValue);
+		mNewValue = -mStack.getValue(1);
+		mStack.setValue(1, mNewValue);
 	}
 
 	private void and() {
@@ -189,8 +189,8 @@ public class InstructionProcessor {
 
 	private void neg() {
 		// M[s]:= 1-M[s]
-		newValue = 1 - mStack.getValue(1);
-		mStack.setValue(mStack.tamPilha() - 1, newValue);
+		mNewValue = 1 - mStack.getValue(1);
+		mStack.setValue(mStack.stackLenght() - 1, mNewValue);
 	}
 
 	private void cme() {
@@ -263,19 +263,18 @@ public class InstructionProcessor {
 	}
 
 	private void nul() {
-		// nada a se fazer.
 	}
 
 	private void rd() {
 		// S:=s+1; M[s]:=proxima entra
-		String value = JOptionPane.showInputDialog(null, "Valor:", "Entrada de valor", JOptionPane.QUESTION_MESSAGE);
-		newValue = Integer.parseInt(value);
-		mStack.push(mStack.tamPilha(), newValue);
+		String value = JOptionPane.showInputDialog(null, "Value:", "Input Value:", JOptionPane.QUESTION_MESSAGE);
+		mNewValue = Integer.parseInt(value);
+		mStack.push(mStack.stackLenght(), mNewValue);
 	}
 
 	private void prn() {
 		// M[s];s:=s-1;
-		output = String.valueOf(mStack.getValue(1));
+		mOutput = String.valueOf(mStack.getValue(1));
 		mStack.pop();
 	}
 
@@ -311,7 +310,7 @@ public class InstructionProcessor {
 
 	private void ldc(int param) {
 		// S:=s+1 ; M[s]:=k
-		mStack.push(mStack.tamPilha(), param);
+		mStack.push(mStack.stackLenght(), param);
 	}
 
 	private void ldv(int param) {
@@ -332,14 +331,14 @@ public class InstructionProcessor {
 
 	private void jmpf(int param) {
 		// desviar caso falso se M[s]=0, entao i:=att1, senao i:=i+1
-		newValue = mStack.getValue(1);
-		if (newValue == 0)
+		mNewValue = mStack.getValue(1);
+		if (mNewValue == 0)
 			mInstruction = param;
 		mStack.pop();
 	}
 
 	private void call(int param) {
-		mStack.push(mStack.tamPilha(), mInstruction + 1);
+		mStack.push(mStack.stackLenght(), mInstruction + 1);
 		mInstruction = param;
 	}
 
@@ -359,7 +358,7 @@ public class InstructionProcessor {
 	private void alloc(int p1, int p2) {
 		// {s:=s + 1; M[s]:=M[m+k]}
 		for (int k = 0; k < (p2); k++) {
-			mStack.push(mStack.tamPilha(), 0);
+			mStack.push(mStack.stackLenght(), 0);
 			mStack.setValue(1, mStack.getFixedValue(p1 + k));
 		}
 	}

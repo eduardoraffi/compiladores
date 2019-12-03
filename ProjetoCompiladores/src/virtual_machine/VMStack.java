@@ -12,15 +12,15 @@ public class VMStack {
 		this.mPosition = 0;
 	}
 
-	public boolean pilhaVazia() {
+	public boolean emptyStack() {
 		if (this.mPosition < 1) {
 			return true;
 		} else
 			return false;
 	}
 
-	public int tamPilha() {
-		if (!pilhaVazia()) {
+	public int stackLenght() {
+		if (!emptyStack()) {
 			return mStackContentVector.size();
 		} else
 			return 0;

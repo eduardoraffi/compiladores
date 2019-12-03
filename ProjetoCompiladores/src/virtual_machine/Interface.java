@@ -38,7 +38,6 @@ public class Interface extends javax.swing.JFrame {
 		textoSaida.setLineWrap(true);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void initComponents() {
 
 		seletorDeArquivo = new javax.swing.JFileChooser();
@@ -61,21 +60,13 @@ public class Interface extends javax.swing.JFrame {
 		BotaoAbrirArqv = new javax.swing.JMenuItem();
 		BotaoExecutarArqv = new javax.swing.JMenuItem();
 
-		seletorDeArquivo.setFileFilter(new FiltroDeArquivo());
-
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
 		tabelaInstrucao.setModel(new javax.swing.table.DefaultTableModel(new Object[][] {
 
 		}, new String[] { "Line", "Instruction", "Attr 1", "Attr 2" }) {
 			private static final long serialVersionUID = 1L;
-			Class[] types = new Class[] { java.lang.String.class, java.lang.String.class, java.lang.String.class,
-					java.lang.String.class };
 			boolean[] canEdit = new boolean[] { false, false, false, false };
-
-			public Class getColumnClass(int columnIndex) {
-				return types[columnIndex];
-			}
 
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
 				return canEdit[columnIndex];
@@ -96,12 +87,7 @@ public class Interface extends javax.swing.JFrame {
 		}, new String[] { "Address", "Value" }) {
 		
 			private static final long serialVersionUID = 1L;
-			Class[] types = new Class[] { java.lang.Integer.class, java.lang.Integer.class };
 			boolean[] canEdit = new boolean[] { false, false };
-
-			public Class getColumnClass(int columnIndex) {
-				return types[columnIndex];
-			}
 
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
 				return canEdit[columnIndex];
@@ -156,7 +142,7 @@ public class Interface extends javax.swing.JFrame {
 		jLabel6.setFont(new java.awt.Font("Arial", 0, 18)); 
 		jLabel6.setText("Saida");
 
-		jMenu1.setText("Arquivo");
+		jMenu1.setText("File");
 		jMenu1.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				jMenu1ActionPerformed(evt);
@@ -297,11 +283,11 @@ public class Interface extends javax.swing.JFrame {
 				tabelaInstrucao.setSelectionBackground(Color.lightGray);
 				tabelaInstrucao.setRowSelectionInterval(processador.mInstruction - 1, processador.mInstruction - 1);
 				mStack = processador.getStack();
-				zerarTabPilha();
-				preencherTabPilha(mStack.tamPilha());
+				clearStackTab();
+				preencherTabPilha(mStack.stackLenght());
 				exibirSaida();
-				for (int a = 0; a < numBreaks; a++) {
-					if (processador.mInstruction + 1 == Integer.parseInt(mBreakPoint.get(a))) {
+				for (int i = 0; i < numBreaks; i++) {
+					if (processador.mInstruction + 1 == Integer.parseInt(mBreakPoint.get(i))) {
 						runWithBreakPoint = true;
 					}
 				}
@@ -309,10 +295,10 @@ public class Interface extends javax.swing.JFrame {
 			runWithBreakPoint = false;
 			if (processador.isStackReachEnd()) {
 				botaoBreak.setEnabled(false);
-				JOptionPane.showMessageDialog(null, "Compilação chegou ao fim!", "Alerta", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Instructions endInstructions end", "Attention", JOptionPane.WARNING_MESSAGE);
 			}
 		} else
-			JOptionPane.showMessageDialog(null, "Abra um arquivo fonte antes de compilar", "Erro de Caminho",
+			JOptionPane.showMessageDialog(null, "Please input some file before start", "missing file",
 					JOptionPane.ERROR_MESSAGE);
 	}
 
@@ -325,17 +311,17 @@ public class Interface extends javax.swing.JFrame {
 				tabelaInstrucao.setSelectionBackground(Color.lightGray);
 				tabelaInstrucao.setRowSelectionInterval(processador.mInstruction - 1, processador.mInstruction - 1);
 				mStack = processador.getStack();
-				zerarTabPilha();
-				preencherTabPilha(mStack.tamPilha());
+				clearStackTab();
+				preencherTabPilha(mStack.stackLenght());
 				exibirSaida();
 			} else {
 				botaoContinuar.setEnabled(false);
 				botaoBreak.setEnabled(false);
 				BotaoExecutarArqv.setEnabled(false);
-				JOptionPane.showMessageDialog(null, "Compilação chegou ao fim!", "Alerta", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Instructions end", "Attention", JOptionPane.WARNING_MESSAGE);
 			}
 		} else
-			JOptionPane.showMessageDialog(null, "Abra um arquivo fonte antes de compilar", "Erro de Caminho",
+			JOptionPane.showMessageDialog(null, "Please input some file before start.", "missing file",
 					JOptionPane.ERROR_MESSAGE);
 	}
 
@@ -346,17 +332,17 @@ public class Interface extends javax.swing.JFrame {
 			while (processador.getInstrucoes().size() > i || !processador.isStackReachEnd()) {
 				processador.runInstruction();
 				mStack = processador.getStack();
-				zerarTabPilha();
-				preencherTabPilha(mStack.tamPilha());
+				clearStackTab();
+				preencherTabPilha(mStack.stackLenght());
 				exibirSaida();
 				i++;
 			}
 			botaoContinuar.setEnabled(false);
 			botaoBreak.setEnabled(false);
 			BotaoExecutarArqv.setEnabled(false);
-			JOptionPane.showMessageDialog(null, "Compilação chegou ao fim!", "Alerta", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Instructions end", "Attention", JOptionPane.WARNING_MESSAGE);
 		} else
-			JOptionPane.showMessageDialog(null, "Abra um arquivo fonte antes de compilar", "Erro de Caminho",
+			JOptionPane.showMessageDialog(null, "Please input some file before start.", "missing file",
 					JOptionPane.ERROR_MESSAGE);
 	}
 
@@ -417,20 +403,20 @@ public class Interface extends javax.swing.JFrame {
 
 	@SuppressWarnings("resource")
 	private void inicializarTabelaArquivo() throws FileNotFoundException {
-		FileInputStream abertura = new FileInputStream(mFileUrl);
-		new InputStreamReader(abertura);
+		FileInputStream fInputStream = new FileInputStream(mFileUrl);
+		new InputStreamReader(fInputStream);
 		mDefaultTableModelInstruction = (DefaultTableModel) tabelaInstrucao.getModel();
 		try {
 			int i = 0;
 			processador = new InstructionProcessor(mFileUrl);
-			zerarTabInstrucao();
-			zerarTabPilha();
-			zerarSaida();
+			clearInstructionTab();
+			clearStackTab();
+			clearOutput();
 			botaoContinuar.setEnabled(true);
 			botaoBreak.setEnabled(true);
 			BotaoExecutarArqv.setEnabled(true);
 			textoBreak.setEditable(true);
-			textoBreak.setText("Digite as linhas de Break Point separadas por espaço.");
+			textoBreak.setText("Type break point lines separating with blank spaces.");
 			firstClick = 0;
 			while (i < processador.getInstrucoes().size()) {
 				switch (InstructionTypeAndName.getInstructionType(processador.getInstrucoes().get(i).getInstrucao())) {
@@ -463,7 +449,7 @@ public class Interface extends javax.swing.JFrame {
 		int res, i = 0;
 		String aux = "", val;
 		val = String.valueOf(textoBreak.getText());
-		if (val.equals("Digite as linhas de Break Point separadas por espaço.") == false) {
+		if (val.equals("Type break point lines separating with blank spaces.") == false) {
 			System.out.println(val);
 			while (i < val.length()) {
 				res = val.charAt(i);
@@ -480,7 +466,7 @@ public class Interface extends javax.swing.JFrame {
 		numBreaks = mBreakPoint.size();
 	}
 
-	public void zerarTabPilha() {
+	public void clearStackTab() {
 		if (mDefaultTableModelStack.getRowCount() > 0) {
 			int rows = mDefaultTableModelStack.getRowCount();
 			for (int a = rows; a > 0; a--) {
@@ -497,7 +483,7 @@ public class Interface extends javax.swing.JFrame {
 		}
 	}
 
-	public void zerarTabInstrucao() {
+	public void clearInstructionTab() {
 		if (mDefaultTableModelInstruction.getRowCount() > 0) {
 			int rows = mDefaultTableModelInstruction.getRowCount();
 			for (int a = rows; a > 0; a--) {
@@ -513,19 +499,7 @@ public class Interface extends javax.swing.JFrame {
 		}
 	}
 
-	public void zerarSaida() {
+	public void clearOutput() {
 		textoSaida.setText("");
-	}
-}
-
-class FiltroDeArquivo extends javax.swing.filechooser.FileFilter {
-	@Override
-	public boolean accept(File file) {
-		return file.isDirectory() || file.getAbsolutePath().endsWith(".txt");
-	}
-
-	@Override
-	public String getDescription() {
-		return "*.txt";
 	}
 }

@@ -129,7 +129,7 @@ public class Token
     	 switch (this.mSymbol)
          {
  	        case Constants.S_INVERTER:
- 	        	return 1;   
+ 	        	return 0;   
  	        case Constants.S_PROGRAMA:
  	            return 1;
  	        case Constants.S_INICIO:

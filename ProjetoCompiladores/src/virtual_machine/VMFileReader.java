@@ -45,7 +45,7 @@ public class VMFileReader {
 					if (bufferedReader != null)
 						bufferedReader.close();
 				} catch (IOException e) {
-					System.err.printf("Erro na leitura do arquivo: %s.\n", e.getMessage());
+					System.err.printf("Error reading file. ", e.getMessage());
 				}
 			}
 		}
@@ -109,7 +109,7 @@ public class VMFileReader {
 							break;
 					}
 					if (j == labels.capacity())
-						throw new Exception("label invalido");
+						throw new Exception("Invalid label");
 
 					parameter1 = labels.get(j).getLinha();
 				} else {

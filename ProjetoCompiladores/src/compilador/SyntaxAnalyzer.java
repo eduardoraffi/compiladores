@@ -13,8 +13,8 @@ public class SyntaxAnalyzer {
 	private SemanticAnalyzer mSemanticAnalyzer;
 	private boolean isFunctionAttribuition = false;
 
-	public SyntaxAnalyzer(String caminhoArquivo) throws Exception {
-		mLexicalAnalyzer = new LexicalAnalyzer(caminhoArquivo);
+	public SyntaxAnalyzer(String filePath) throws Exception {
+		mLexicalAnalyzer = new LexicalAnalyzer(filePath);
 		mTokenVector = mLexicalAnalyzer.pegaTokens();
 		mToken = mTokenVector.get(actualVectorIndex);
 		mSemanticAnalyzer = new SemanticAnalyzer();
@@ -25,7 +25,6 @@ public class SyntaxAnalyzer {
 		if (mToken.getSymbolId() == Constants.PROGRAMA) {
 			getNextToken();
 			CodeGenerator.getInstance().generateCommand(Constants.CG_START);
-			CodeGenerator.getInstance().generateCommand(Constants.CG_ALLOC, 0, 1);
 
 			if (mToken.getSymbolId() == Constants.IDENTIFICADOR) {
 				mSemanticAnalyzer.insertInSymbolTable(new Symbol(new Rotina(Constants.L_PROGRAMA), mToken));
@@ -36,7 +35,6 @@ public class SyntaxAnalyzer {
 
 					if (mToken.getSymbolId() == Constants.PONTO) {
 						mSemanticAnalyzer.finalizaEscopo();
-						CodeGenerator.getInstance().generateCommand(Constants.CG_DALLOC, 0, 1);
 						CodeGenerator.getInstance().generateCommand(Constants.CG_HALT);
 						System.out.println("Sucesso");
 
@@ -60,11 +58,11 @@ public class SyntaxAnalyzer {
 			Errors.semanticError(mToken.getLine(), ErrorType.TOKEN_VECTOR_END);
 	}
 
-	private void analisaBloco(Token func) throws Exception {
+	private void analisaBloco(Token token) throws Exception {
 		getNextToken();
 		analisaEtVariaveis();
 		analisaSubRotinas();
-		analisaComandos(func);
+		analisaComandos(token);
 	}
 
 	private void analisaEtVariaveis() throws Exception {
@@ -145,16 +143,16 @@ public class SyntaxAnalyzer {
 		}
 	}
 
-	private void analisaComandoSimples(Token func) throws Exception {
+	private void analisaComandoSimples(Token token) throws Exception {
 		switch (mToken.getSymbolId()) {
 		case Constants.IDENTIFICADOR:
 			analisaAtribChProcedimento();
 			break;
 		case Constants.SE:
-			analisaSe(func);
+			analisaSe(token);
 			break;
 		case Constants.ENQUANTO:
-			analisaEnquanto(func);
+			analisaEnquanto(token);
 			break;
 		case Constants.LEIA:
 			analisaLeia();
@@ -163,7 +161,7 @@ public class SyntaxAnalyzer {
 			analisaEscreva();
 			break;
 		default:
-			analisaComandos(func);
+			analisaComandos(token);
 			break;
 		}
 	}
@@ -243,7 +241,7 @@ public class SyntaxAnalyzer {
 		}
 	}
 
-	private void analisaEnquanto(Token rotina) throws Exception {
+	private void analisaEnquanto(Token token) throws Exception {
 		int auxrot1 = mSemanticAnalyzer.getLabel();
 		int auxrot2 = mSemanticAnalyzer.getLabel();
 
@@ -258,7 +256,7 @@ public class SyntaxAnalyzer {
 		if (mToken.getSymbolId() == Constants.FACA) {
 			CodeGenerator.getInstance().generateCommand(Constants.CG_JMPF, Constants.CG_LABEL + "" + auxrot2);
 			getNextToken();
-			analisaComandoSimples(rotina);
+			analisaComandoSimples(token);
 
 			CodeGenerator.getInstance().generateCommand(Constants.CG_JUMP, Constants.CG_LABEL + "" + auxrot2);
 			CodeGenerator.getInstance().generateLabel(auxrot2);
@@ -267,25 +265,25 @@ public class SyntaxAnalyzer {
 		}
 	}
 
-	private void analisaSe(Token rotina) throws Exception {
+	private void analisaSe(Token token) throws Exception {
 		getNextToken();
 		mSemanticAnalyzer.comecaExpressao();
 		analisaExpressao();
 		mSemanticAnalyzer.terminaExpressao();
 		if (mSemanticAnalyzer.booleanExp()) {
-			// Está errado
 			int labelSenao = mSemanticAnalyzer.getLabel();
 			int labelSe = mSemanticAnalyzer.getLabel();
 			CodeGenerator.getInstance().generateCommand(Constants.CG_JMPF, Constants.CG_LABEL + "" + labelSenao);
 			if (mToken.getSymbolId() == Constants.ENTAO) {
 				getNextToken();
-				analisaComandoSimples(rotina);
+				analisaComandoSimples(token);
 				CodeGenerator.getInstance().generateCommand(Constants.CG_JUMP, Constants.CG_LABEL + "" + labelSe);
 				CodeGenerator.getInstance().generateLabel(labelSenao);
 				if (mToken.getSymbolId() == Constants.SENAO) {
 					getNextToken();
-					analisaComandoSimples(rotina);
+					analisaComandoSimples(token);
 				}
+				CodeGenerator.getInstance().generateLabel(labelSe);
 			} else {
 				Errors.syntaxError(mToken.getLine(), ErrorType.MISSING_ENTAO);
 			}

@@ -96,6 +96,7 @@ public class SymbolTable {
 	}
 
 	public boolean checkIfRotinaExists(Symbol symbol) {
+		@SuppressWarnings("unused")
 		GenericType genericType;
 		int level;
 		int i = (mSymbolVector.size() - 1);

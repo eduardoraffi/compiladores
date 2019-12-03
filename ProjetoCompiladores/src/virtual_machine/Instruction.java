@@ -8,7 +8,7 @@ public class Instruction {
 	public Instruction(InstructionTypeAndName instructionTypeAndName, int line) throws Exception {
 		mInstructionTypeAndName = instructionTypeAndName;
 		if (line < 0) {
-			throw new Exception("linha negativa");
+			throw new Exception("line cannot be lower than zero");
 		}
 		mLine = line;
 	}

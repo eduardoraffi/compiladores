@@ -72,7 +72,7 @@ public class SemanticAnalyzer {
 		mSymbolTable.addSymbol(symbol);
 	}
 
-	public void insertGenericTypeInSymbolTable(GenericType genericType) throws Exception {
+	public void insertGenericTypeInSymbolTable(GenericType genericType) throws Exception {//Alloc variaveis declaradas
 		int i = mSymbolTable.getSize() - 1;
 		int posInit = mStackPosition;
 		int alloc = 0;
@@ -123,25 +123,7 @@ public class SemanticAnalyzer {
 		mLevel--;
 	}
 
-	public void setSymbolType(Symbol symbol, String type) throws Exception {
-		GenericType genericType = null;
-		switch (type) {
-		case Constants.L_FUNC_INT:
-		case Constants.L_FUNC_BOOL:
-		case Constants.L_PROCEDIMENTO:
-			genericType = new Rotina(type);
-			break;
-		case Constants.L_INTEIRO:
-		case Constants.L_BOOLEANO:
-			genericType = new DeclaredVar(type);
-			break;
-		default:
-			Errors.semanticError(symbol.getToken().getLine(),ErrorType.INVALID_TYPE);
-		}
-		mSymbolTable.getSymbol(symbol).setType(genericType);
-	}
-
-	//Expression analysis
+	//Verifica expressão
 	public void comecaExpressao() throws Exception {
 		mVerificaExpressao.comecaExpressao();
 	}

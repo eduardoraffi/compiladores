@@ -7,9 +7,9 @@ public class Label {
 
 	public Label(int line, String label) throws Exception {
 		if (line < 0)
-			throw new Exception("linha inválida");
+			throw new Exception("Invalid line. Must be greater than zero.");
 		if (label.equals(""))
-			throw new Exception("linha inválida");
+			throw new Exception("Invalid label. label is empty.");
 
 		this.mLine = line;
 		this.mLabel = label;
