@@ -34,7 +34,7 @@ public class SyntaxAnalyzer {
 					analisaBloco(null);
 
 					if (mToken.getSymbolId() == Constants.PONTO) {
-						mSemanticAnalyzer.finalizaEscopo();
+						mSemanticAnalyzer.finalizaEscopo(false);
 						CodeGenerator.getInstance().generateCommand(Constants.CG_HALT);
 						System.out.println("Sucesso");
 
@@ -167,17 +167,17 @@ public class SyntaxAnalyzer {
 	}
 
 	private void analisaAtribChProcedimento() throws Exception {
-		Token t = mToken;
+		Token token = mToken;
 		getNextToken();
 		if (mToken.getSymbolId() == Constants.ATRIBUICAO) {
-			if (mSemanticAnalyzer.pesquisaDeclVarFunc(t)) {
-				analisaAtribuicao(t);
+			if (mSemanticAnalyzer.pesquisaDeclVarFunc(token)) {
+				analisaAtribuicao(token);
 			} else {
 				Errors.semanticError(mToken.getLine(), ErrorType.INVALID_VAR);
 			}
 
 		} else {
-			analisaChamadaProcedimento(t);
+			analisaChamadaProcedimento(token);
 		}
 	}
 
@@ -338,7 +338,7 @@ public class SyntaxAnalyzer {
 			Errors.syntaxError(mToken.getLine(), ErrorType.MISSING_IDENTIFIER);
 		}
 
-		mSemanticAnalyzer.finalizaEscopo();
+		mSemanticAnalyzer.finalizaEscopo(false);
 		CodeGenerator.getInstance().generateCommand(Constants.CG_RETURN);
 	}
 
@@ -376,8 +376,7 @@ public class SyntaxAnalyzer {
 			Errors.syntaxError(mToken.getLine(), ErrorType.MISSING_IDENTIFIER);
 		}
 
-		mSemanticAnalyzer.finalizaEscopo();
-		CodeGenerator.getInstance().generateCommand(Constants.CG_RETURN);
+		mSemanticAnalyzer.finalizaEscopo(true);
 	}
 
 	private void analisaExpressao() throws Exception {

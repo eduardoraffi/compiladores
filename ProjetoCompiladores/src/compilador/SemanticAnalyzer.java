@@ -1,5 +1,9 @@
 package compilador;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Vector;
+
 import compilador.Errors.ErrorType;
 
 public class SemanticAnalyzer {
@@ -29,7 +33,7 @@ public class SemanticAnalyzer {
 		symbol.setLevel(mLevel);
 		return mSymbolTable.checkIfRotinaExists(symbol);
 	}
-	
+
 	public boolean pesquisaDeclVarTabela(Token token) throws Exception {
 		Symbol symbol = new Symbol(token);
 		if (mSymbolTable.checkIfSymbolExists(symbol)) {
@@ -39,7 +43,7 @@ public class SemanticAnalyzer {
 		}
 		return false;
 	}
-	
+
 	public boolean pesquisaDeclVarFunc(Token token) throws Exception {
 		Symbol symbol = new Symbol(token);
 		if (mSymbolTable.checkIfSymbolExists(symbol)) {
@@ -49,12 +53,12 @@ public class SemanticAnalyzer {
 		}
 		return false;
 	}
-	
+
 	public boolean pesquisaDeclProc(Token token) throws Exception {
 		Symbol symbol = new Symbol(token);
 		return mSymbolTable.checkIfSymbolExists(symbol);
 	}
-	
+
 	public void insertInSymbolTable(Symbol symbol) throws Exception {
 		symbol.setLevel(mLevel);
 		if (symbol.getType() != null) {
@@ -72,7 +76,7 @@ public class SemanticAnalyzer {
 		mSymbolTable.addSymbol(symbol);
 	}
 
-	public void insertGenericTypeInSymbolTable(GenericType genericType) throws Exception {//Alloc variaveis declaradas
+	public void insertGenericTypeInSymbolTable(GenericType genericType) throws Exception {// Alloc variaveis declaradas
 		int i = mSymbolTable.getSize() - 1;
 		int posInit = mStackPosition;
 		int alloc = 0;
@@ -101,7 +105,7 @@ public class SemanticAnalyzer {
 		return mSymbolTable.getSymbol(symbol).getType();
 	}
 
-	public void finalizaEscopo() throws Exception {
+	public void finalizaEscopo(boolean isFunction) throws Exception {
 		Symbol aux;
 		int count = mSymbolTable.getSize() - 1;
 		int dealloc = 0;
@@ -119,11 +123,16 @@ public class SemanticAnalyzer {
 			count--;
 		}
 		mStackPosition = mStackPosition - dealloc;
-		CodeGenerator.getInstance().generateCommand(Constants.CG_DALLOC, mStackPosition, dealloc);
+		if (!isFunction && dealloc != 0) {
+			CodeGenerator.getInstance().generateCommand(Constants.CG_DALLOC, mStackPosition, dealloc);
+		} else if (isFunction) {
+			CodeGenerator.getInstance().generateCommand(Constants.CG_RETURNF, mStackPosition, dealloc);
+		}
+
 		mLevel--;
 	}
 
-	//Verifica expressão
+	// Verifica expressão
 	public void comecaExpressao() throws Exception {
 		mVerificaExpressao.comecaExpressao();
 	}
@@ -149,8 +158,8 @@ public class SemanticAnalyzer {
 			mVerificaExpressao.adicionaFatorNaExpressao(token);
 		}
 	}
-	
+
 	public void terminaExpressao() throws Exception {
 		mVerificaExpressao.terminaExpressao();
-	}	
+	}
 }

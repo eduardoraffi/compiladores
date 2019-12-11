@@ -69,6 +69,8 @@ public class VMFileReader {
 			return InstructionType.DOUBLE_COMPOSED.toInt();
 		case Constants.CG_DALLOC:
 			return InstructionType.DOUBLE_COMPOSED.toInt();
+		case Constants.CG_RETURNF:
+			return InstructionType.DOUBLE_COMPOSED.toInt();
 		default:
 			return InstructionType.SIMPLE.toInt(); // any different code return 0 -> simple type instruction
 		}

@@ -126,7 +126,6 @@ public class InstructionProcessor {
 		case RETURN:
 			ret();
 			break;
-
 		default:
 			break;
 		}
@@ -350,9 +349,13 @@ public class InstructionProcessor {
 		case DALLOC:
 			dalloc(instruction.getParameter1(), instruction.getParameter2());
 			break;
+		case RETURNF:
+			retf();
+			break;
 		default:
 			break;
 		}
+		
 	}
 
 	private void alloc(int p1, int p2) {
@@ -369,5 +372,10 @@ public class InstructionProcessor {
 			mStack.setFixedValue(p1 + k, mStack.getValue(1));
 			mStack.pop();
 		}
+	}
+	
+	private void retf() {
+		mInstruction = (mStack.getValue(1)) - 1;
+		mStack.pop();
 	}
 }

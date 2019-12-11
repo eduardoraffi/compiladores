@@ -3,7 +3,7 @@ package virtual_machine;
 public enum InstructionTypeAndName {
 	ADD(0), SUB(0), MULT(0), DIVI(0), INV(0), AND(0), OR(0), NEG(0), CME(0), CMA(0), CEQ(0), CDIF(0), CMEQ(0), CMAQ(0),
 	START(0), HLT(0), NULL(0), RD(0), PRN(0), RETURN(0), LDC(1), LDV(1), STR(1), JMP(1), JMPF(1), CALL(1), ALLOC(2),
-	DALLOC(2);
+	DALLOC(2), RETURNF(2);
 
 	private int mCode;
 
@@ -75,6 +75,8 @@ public enum InstructionTypeAndName {
 			return DALLOC;
 		case Constants.CG_RETURN:
 			return RETURN;
+		case Constants.CG_RETURNF:
+			return RETURNF;
 		case Constants.CG_NULL:
 			return NULL;
 		default:

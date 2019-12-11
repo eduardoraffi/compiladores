@@ -188,4 +188,5 @@ public class Constants
     public static final String CG_PRINT				= "PRN";
     public static final String CG_CALL 				= "CALL";
     public static final String CG_RETURN 			= "RETURN";
+    public static final String CG_RETURNF 			= "RETURNF";
 }
