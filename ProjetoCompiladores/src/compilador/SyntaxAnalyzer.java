@@ -12,19 +12,21 @@ public class SyntaxAnalyzer {
 	private LexicalAnalyzer mLexicalAnalyzer;
 	private SemanticAnalyzer mSemanticAnalyzer;
 	private boolean isFunctionAttribuition = false;
+	private CodeGenerator mCodeGenerator;
 
 	public SyntaxAnalyzer(String filePath) throws Exception {
 		mLexicalAnalyzer = new LexicalAnalyzer(filePath);
+		mCodeGenerator = new CodeGenerator();
 		mTokenVector = mLexicalAnalyzer.pegaTokens();
 		mToken = mTokenVector.get(actualVectorIndex);
-		mSemanticAnalyzer = new SemanticAnalyzer();
+		mSemanticAnalyzer = new SemanticAnalyzer(mCodeGenerator);
 
 		System.out.println(
 				"Simbolo: " + mToken.getSymbol() + " Lexema: " + mToken.getLexem() + "  linha: " + mToken.getLine());
 
 		if (mToken.getSymbolId() == Constants.PROGRAMA) {
 			getNextToken();
-			CodeGenerator.getInstance().generateCommand(Constants.CG_START);
+			mCodeGenerator.generateCommand(Constants.CG_START);
 
 			if (mToken.getSymbolId() == Constants.IDENTIFICADOR) {
 				mSemanticAnalyzer.insertInSymbolTable(new Symbol(new Rotina(Constants.L_PROGRAMA), mToken));
@@ -35,7 +37,7 @@ public class SyntaxAnalyzer {
 
 					if (mToken.getSymbolId() == Constants.PONTO) {
 						mSemanticAnalyzer.finalizaEscopo(false);
-						CodeGenerator.getInstance().generateCommand(Constants.CG_HALT);
+						mCodeGenerator.generateCommand(Constants.CG_HALT);
 						System.out.println("Sucesso");
 
 					} else
@@ -189,9 +191,8 @@ public class SyntaxAnalyzer {
 				if (!mSemanticAnalyzer.pesquisaDeclVarTabela(mToken)) {
 					Errors.semanticError(mToken.getLine(), ErrorType.MISSING_IDENTIFIER2);
 				}
-				CodeGenerator.getInstance().generateCommand(Constants.CG_RD);
-				CodeGenerator.getInstance().generateCommand(Constants.CG_STR,
-						mSemanticAnalyzer.getSymbolType(mToken).getInfo());
+				mCodeGenerator.generateCommand(Constants.CG_RD);
+				mCodeGenerator.generateCommand(Constants.CG_STR, mSemanticAnalyzer.getSymbolType(mToken).getInfo());
 
 				getNextToken();
 				if (mToken.getSymbolId() == Constants.FECHA_PARENTESES) {
@@ -217,14 +218,14 @@ public class SyntaxAnalyzer {
 					Errors.semanticError(mToken.getLine(), ErrorType.UNKNOWN_IDENTIFIER);
 				} else {
 					if (mSemanticAnalyzer.getSymbolType(mToken).getClass() == Rotina.class) {
-						CodeGenerator.getInstance().generateCommand(Constants.CG_CALL,
+						mCodeGenerator.generateCommand(Constants.CG_CALL,
 								Constants.CG_LABEL + "" + mSemanticAnalyzer.getSymbolType(mToken).getInfo());
-						CodeGenerator.getInstance().generateCommand(Constants.CG_LDV, 0);
+						mCodeGenerator.generateCommand(Constants.CG_LDV, 0);
 					} else {
-						CodeGenerator.getInstance().generateCommand(Constants.CG_LDV,
+						mCodeGenerator.generateCommand(Constants.CG_LDV,
 								mSemanticAnalyzer.getSymbolType(mToken).getInfo());
 					}
-					CodeGenerator.getInstance().generateCommand(Constants.CG_PRINT);
+					mCodeGenerator.generateCommand(Constants.CG_PRINT);
 				}
 
 				getNextToken();
@@ -246,20 +247,20 @@ public class SyntaxAnalyzer {
 		int auxrot2 = mSemanticAnalyzer.getLabel();
 
 		// Label principal do while
-		CodeGenerator.getInstance().generateLabel(auxrot1);
+		mCodeGenerator.generateLabel(auxrot1);
 
 		getNextToken();
 		mSemanticAnalyzer.comecaExpressao();
 		analisaExpressao();
-		mSemanticAnalyzer.terminaExpressao();
+		mSemanticAnalyzer.terminaExpressao(false);
 
 		if (mToken.getSymbolId() == Constants.FACA) {
-			CodeGenerator.getInstance().generateCommand(Constants.CG_JMPF, Constants.CG_LABEL + "" + auxrot2);
+			mCodeGenerator.generateCommand(Constants.CG_JMPF, Constants.CG_LABEL + "" + auxrot2);
 			getNextToken();
 			analisaComandoSimples(token);
 
-			CodeGenerator.getInstance().generateCommand(Constants.CG_JUMP, Constants.CG_LABEL + "" + auxrot2);
-			CodeGenerator.getInstance().generateLabel(auxrot2);
+			mCodeGenerator.generateCommand(Constants.CG_JUMP, Constants.CG_LABEL + "" + auxrot2);
+			mCodeGenerator.generateLabel(auxrot2);
 		} else {
 			Errors.syntaxError(mToken.getLine(), ErrorType.EXPRESSION);
 		}
@@ -269,21 +270,21 @@ public class SyntaxAnalyzer {
 		getNextToken();
 		mSemanticAnalyzer.comecaExpressao();
 		analisaExpressao();
-		mSemanticAnalyzer.terminaExpressao();
+		mSemanticAnalyzer.terminaExpressao(false);
 		if (mSemanticAnalyzer.booleanExp()) {
 			int labelSenao = mSemanticAnalyzer.getLabel();
 			int labelSe = mSemanticAnalyzer.getLabel();
-			CodeGenerator.getInstance().generateCommand(Constants.CG_JMPF, Constants.CG_LABEL + "" + labelSenao);
+			mCodeGenerator.generateCommand(Constants.CG_JMPF, Constants.CG_LABEL + "" + labelSenao);
 			if (mToken.getSymbolId() == Constants.ENTAO) {
 				getNextToken();
 				analisaComandoSimples(token);
-				CodeGenerator.getInstance().generateCommand(Constants.CG_JUMP, Constants.CG_LABEL + "" + labelSe);
-				CodeGenerator.getInstance().generateLabel(labelSenao);
+				mCodeGenerator.generateCommand(Constants.CG_JUMP, Constants.CG_LABEL + "" + labelSe);
+				mCodeGenerator.generateLabel(labelSenao);
 				if (mToken.getSymbolId() == Constants.SENAO) {
 					getNextToken();
 					analisaComandoSimples(token);
 				}
-				CodeGenerator.getInstance().generateLabel(labelSe);
+				mCodeGenerator.generateLabel(labelSe);
 			} else {
 				Errors.syntaxError(mToken.getLine(), ErrorType.MISSING_ENTAO);
 			}
@@ -298,7 +299,7 @@ public class SyntaxAnalyzer {
 		if ((mToken.getSymbolId() == Constants.PROCEDIMENTO) || (mToken.getSymbolId() == Constants.FUNCAO)) {
 			flag = 1;
 			auxrot = mSemanticAnalyzer.getLabel();
-			CodeGenerator.getInstance().generateCommand(Constants.CG_JUMP, Constants.CG_LABEL + "" + auxrot);
+			mCodeGenerator.generateCommand(Constants.CG_JUMP, Constants.CG_LABEL + "" + auxrot);
 		}
 		while ((mToken.getSymbolId() == Constants.PROCEDIMENTO) || (mToken.getSymbolId() == Constants.FUNCAO)) {
 			if (mToken.getSymbolId() == Constants.PROCEDIMENTO) {
@@ -313,7 +314,7 @@ public class SyntaxAnalyzer {
 			}
 		}
 		if (flag == 1) {
-			CodeGenerator.getInstance().generateLabel(auxrot);
+			mCodeGenerator.generateLabel(auxrot);
 		}
 	}
 
@@ -323,7 +324,7 @@ public class SyntaxAnalyzer {
 			if (!mSemanticAnalyzer.pesquisaDeclProc(mToken)) {
 
 				mSemanticAnalyzer.insertInSymbolTable(new Symbol(new Rotina(Constants.L_PROCEDIMENTO), mToken));
-				CodeGenerator.getInstance().generateLabel(mSemanticAnalyzer.getSymbolType(mToken).getInfo());
+				mCodeGenerator.generateLabel(mSemanticAnalyzer.getSymbolType(mToken).getInfo());
 
 				getNextToken();
 				if (mToken.getSymbolId() == Constants.PONTO_VIRGULA) {
@@ -339,7 +340,7 @@ public class SyntaxAnalyzer {
 		}
 
 		mSemanticAnalyzer.finalizaEscopo(false);
-		CodeGenerator.getInstance().generateCommand(Constants.CG_RETURN);
+		mCodeGenerator.generateCommand(Constants.CG_RETURN);
 	}
 
 	private void analisaDeclaracaoFuncao() throws Exception {
@@ -358,7 +359,7 @@ public class SyntaxAnalyzer {
 						} else
 							mSemanticAnalyzer.insertFuncTypeInSymbolTable(Constants.L_FUNC_BOOL);
 
-						CodeGenerator.getInstance().generateLabel(mSemanticAnalyzer.getSymbolType(func).getInfo());
+						mCodeGenerator.generateLabel(mSemanticAnalyzer.getSymbolType(func).getInfo());
 						getNextToken();
 						if (mToken.getSymbolId() == Constants.PONTO_VIRGULA) {
 							analisaBloco(func);
@@ -461,7 +462,7 @@ public class SyntaxAnalyzer {
 
 	private void analisaChamadaProcedimento(Token t) throws Exception {
 		if (mSemanticAnalyzer.pesquisaDeclProc(t)) {
-			CodeGenerator.getInstance().generateCommand(Constants.CG_CALL,
+			mCodeGenerator.generateCommand(Constants.CG_CALL,
 					Constants.CG_LABEL + "" + mSemanticAnalyzer.getSymbolType(t).getInfo());
 		} else {
 			Errors.semanticError(mToken.getLine(), ErrorType.INVALID_IDENTIFIER_UNKNOWN_PROCEDURE);
@@ -474,21 +475,24 @@ public class SyntaxAnalyzer {
 	}
 
 	private void analisaAtribuicao(Token t) throws Exception {
+		boolean isFunction = false;
 		getNextToken();
 		mSemanticAnalyzer.comecaExpressao();
 		analisaExpressao();
-		mSemanticAnalyzer.terminaExpressao();
+		if (mSemanticAnalyzer.getSymbolType(t).getType().equals(Constants.L_FUNC_INT)
+				|| mSemanticAnalyzer.getSymbolType(t).getType().equals(Constants.L_FUNC_BOOL)) {
+			isFunction = true;
+		}
+		mSemanticAnalyzer.terminaExpressao(isFunction);
 		if (mSemanticAnalyzer.getSymbolType(t).getType().equals(Constants.L_INTEIRO)
 				|| mSemanticAnalyzer.getSymbolType(t).getType().equals(Constants.L_BOOLEANO)) {
 			if (mSemanticAnalyzer.booleanExp()
 					&& mSemanticAnalyzer.getSymbolType(t).getType().equals(Constants.L_BOOLEANO)) {
-				CodeGenerator.getInstance().generateCommand(Constants.CG_STR,
-						mSemanticAnalyzer.getSymbolType(t).getInfo());
+				mCodeGenerator.generateCommand(Constants.CG_STR, mSemanticAnalyzer.getSymbolType(t).getInfo());
 			} else {
 				if (!mSemanticAnalyzer.booleanExp()
 						&& mSemanticAnalyzer.getSymbolType(t).getType().equals(Constants.L_INTEIRO)) {
-					CodeGenerator.getInstance().generateCommand(Constants.CG_STR,
-							mSemanticAnalyzer.getSymbolType(t).getInfo());
+					mCodeGenerator.generateCommand(Constants.CG_STR, mSemanticAnalyzer.getSymbolType(t).getInfo());
 				} else {
 					Errors.semanticError(mToken.getLine(), ErrorType.INVALID_EXPRESSION_BOOL);
 				}
@@ -497,12 +501,10 @@ public class SyntaxAnalyzer {
 			if (mSemanticAnalyzer.booleanExp()
 					&& mSemanticAnalyzer.getSymbolType(t).getType().equals(Constants.L_FUNC_BOOL)) {
 				isFunctionAttribuition = true;
-				CodeGenerator.getInstance().generateCommand(Constants.CG_STR, 0);
 			} else {
 				if (!mSemanticAnalyzer.booleanExp()
 						&& mSemanticAnalyzer.getSymbolType(t).getType().equals(Constants.L_FUNC_INT)) {
 					isFunctionAttribuition = true;
-					CodeGenerator.getInstance().generateCommand(Constants.CG_STR, 0);
 				} else {
 					Errors.semanticError(mToken.getLine(), ErrorType.INVALID_EXPRESSION_INT);
 				}

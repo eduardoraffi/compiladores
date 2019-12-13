@@ -9,10 +9,13 @@ public class VerificaExpressao {
 	@SuppressWarnings("rawtypes")
 	private Vector<PosFixa> mPosFixa;
 	private Vector<Token> mStack;
+	private CodeGenerator mCodeGenerator;
 
 	private boolean isBooleanExpression = false;
+	private boolean isFunctionReturn;
 
-	public VerificaExpressao() {
+	public VerificaExpressao(CodeGenerator codeGenerator) {
+		mCodeGenerator = codeGenerator;
 		mPosFixa = null;
 		mStack = null;
 	}
@@ -24,46 +27,46 @@ public class VerificaExpressao {
 				ExpOp op = (ExpOp) mPosFixa.get(pos);
 				switch (op.getExp().getSymbolId()) {
 				case Constants.INVERTER:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_INV);
+					mCodeGenerator.generateCommand(Constants.CG_INV);
 					break;
 				case Constants.MAIOR:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_CMA);
+					mCodeGenerator.generateCommand(Constants.CG_CMA);
 					break;
 				case Constants.MAIORIG:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_CMAQ);
+					mCodeGenerator.generateCommand(Constants.CG_CMAQ);
 					break;
 				case Constants.IG:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_CEQ);
+					mCodeGenerator.generateCommand(Constants.CG_CEQ);
 					break;
 				case Constants.MENOR:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_CME);
+					mCodeGenerator.generateCommand(Constants.CG_CME);
 					break;
 				case Constants.MENORIG:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_CMEQ);
+					mCodeGenerator.generateCommand(Constants.CG_CMEQ);
 					break;
 				case Constants.DIF:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_CDIF);
+					mCodeGenerator.generateCommand(Constants.CG_CDIF);
 					break;
 				case Constants.MAIS:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_ADD);
+					mCodeGenerator.generateCommand(Constants.CG_ADD);
 					break;
 				case Constants.MENOS:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_SUB);
+					mCodeGenerator.generateCommand(Constants.CG_SUB);
 					break;
 				case Constants.MULT:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_MULT);
+					mCodeGenerator.generateCommand(Constants.CG_MULT);
 					break;
 				case Constants.DIV:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_DIVI);
+					mCodeGenerator.generateCommand(Constants.CG_DIVI);
 					break;
 				case Constants.E:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_AND);
+					mCodeGenerator.generateCommand(Constants.CG_AND);
 					break;
 				case Constants.OU:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_OR);
+					mCodeGenerator.generateCommand(Constants.CG_OR);
 					break;
 				case Constants.NAO:
-					CodeGenerator.getInstance().generateCommand(Constants.CG_NEG);
+					mCodeGenerator.generateCommand(Constants.CG_NEG);
 					break;
 				default:
 					Errors.generalError(ErrorType.GENERATE_EXPRESSION);
@@ -72,22 +75,23 @@ public class VerificaExpressao {
 			} else if (mPosFixa.get(pos).getClass() == ExpNum.class) {
 				ExpNum num = (ExpNum) mPosFixa.get(pos);
 				if (num.getExp().getSymbolId() == Constants.NUMERO) {
-					CodeGenerator.getInstance().generateCommand(Constants.CG_LDC, num.getExp().getLexem());
+					mCodeGenerator.generateCommand(Constants.CG_LDC, num.getExp().getLexem());
 				} else {
 					if (num.getExp().getSymbolId() == Constants.VERDADEIRO) {
-						CodeGenerator.getInstance().generateCommand(Constants.CG_LDC, 1);
+						mCodeGenerator.generateCommand(Constants.CG_LDC, 1);
 					} else {
-						CodeGenerator.getInstance().generateCommand(Constants.CG_LDC, 0);
+						mCodeGenerator.generateCommand(Constants.CG_LDC, 0);
 					}
 				}
 			} else {
 				ExpSimb sim = (ExpSimb) mPosFixa.get(pos);
 				if (sim.getExp().getType().getClass() == Rotina.class) {
-					CodeGenerator.getInstance().generateCommand(Constants.CG_CALL,
+					mCodeGenerator.generateCommand(Constants.CG_CALL,
 							Constants.CG_LABEL + "" + sim.getExp().getType().getInfo());
-					CodeGenerator.getInstance().generateCommand(Constants.CG_LDV, 0);
+					mCodeGenerator.generateCommand(Constants.CG_LDV, 0);
 				} else {
-					CodeGenerator.getInstance().generateCommand(Constants.CG_LDV, sim.getExp().getType().getInfo());
+					if(!isFunctionReturn)
+					mCodeGenerator.generateCommand(Constants.CG_LDV, sim.getExp().getType().getInfo());
 				}
 			}
 			pos++;
@@ -346,10 +350,12 @@ public class VerificaExpressao {
 		throw new Exception("priorityOrder(): " + i + "Invalid symbol");
 	}
 
-	public void terminaExpressao() throws Exception {
+	public void terminaExpressao(boolean isFunctionReturn) throws Exception {
 		if (mPosFixa == null)
 			throw new Exception("adding in expression without starting another one");
 
+		this.isFunctionReturn = isFunctionReturn;
+		
 		int i = mStack.size() - 1;
 		while (i >= 0) {
 			mPosFixa.add(new ExpOp(mStack.remove(i)));

@@ -9,13 +9,15 @@ import compilador.Errors.ErrorType;
 public class SemanticAnalyzer {
 	private SymbolTable mSymbolTable;
 	private VerificaExpressao mVerificaExpressao;
+	private CodeGenerator mCodeGenerator;
 	private int mLabel = 0;
-	private int mStackPosition = 1;
+	private int mStackPosition = 0;
 	private int mLevel = 0;
 
-	public SemanticAnalyzer() {
+	public SemanticAnalyzer(CodeGenerator codeGenerator) {
 		mSymbolTable = new SymbolTable();
-		mVerificaExpressao = new VerificaExpressao();
+		mVerificaExpressao = new VerificaExpressao(codeGenerator);
+		mCodeGenerator = codeGenerator;
 	}
 
 	public int getNivel() {
@@ -81,13 +83,20 @@ public class SemanticAnalyzer {
 		int posInit = mStackPosition;
 		int alloc = 0;
 		while (i > 0 && mSymbolTable.getSymbol(i).getType() == null) {
-			GenericType type = new DeclaredVar(genericType.getType(), mStackPosition);
-			mSymbolTable.getSymbol(i).setType(type);
 			mStackPosition++;
 			alloc++;
 			i--;
 		}
-		CodeGenerator.getInstance().generateCommand(Constants.CG_ALLOC, posInit, alloc);
+		i = mSymbolTable.getSize() - 1;
+		int stackPosAux = mStackPosition;
+		while (i > 0 && mSymbolTable.getSymbol(i).getType() == null) {
+			GenericType type = new DeclaredVar(genericType.getType(), stackPosAux-1);
+			mSymbolTable.getSymbol(i).setType(type);
+			stackPosAux--;
+			i--;
+		}
+
+		mCodeGenerator.generateCommand(Constants.CG_ALLOC, posInit, alloc);
 	}
 
 	public void insertFuncTypeInSymbolTable(String type) throws Exception {
@@ -124,9 +133,9 @@ public class SemanticAnalyzer {
 		}
 		mStackPosition = mStackPosition - dealloc;
 		if (!isFunction && dealloc != 0) {
-			CodeGenerator.getInstance().generateCommand(Constants.CG_DALLOC, mStackPosition, dealloc);
+			mCodeGenerator.generateCommand(Constants.CG_DALLOC, mStackPosition, dealloc);
 		} else if (isFunction) {
-			CodeGenerator.getInstance().generateCommand(Constants.CG_RETURNF, mStackPosition, dealloc);
+			mCodeGenerator.generateCommand(Constants.CG_RETURNF, mStackPosition, dealloc);
 		}
 
 		mLevel--;
@@ -159,7 +168,7 @@ public class SemanticAnalyzer {
 		}
 	}
 
-	public void terminaExpressao() throws Exception {
-		mVerificaExpressao.terminaExpressao();
+	public void terminaExpressao(boolean isFunctionReturn) throws Exception {
+		mVerificaExpressao.terminaExpressao(isFunctionReturn);
 	}
 }

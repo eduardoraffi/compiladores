@@ -7,17 +7,10 @@ public class CodeGenerator {
 
 	private File mFile;
 	private Formatter mFormmater;
-	private static CodeGenerator mInstance;
 
-	public static CodeGenerator getInstance() throws Exception {
-		if (mInstance == null)
-			mInstance = new CodeGenerator(Constants.PATH_CODE_GEN);
-		return mInstance;
-	}
-
-	private CodeGenerator(String source) throws Exception {
+	public CodeGenerator() throws Exception {
 		try {
-			mFile = new File(source);
+			mFile = new File(Constants.PATH_CODE_GEN);
 			if (mFile.exists())
 				mFile.delete();
 
